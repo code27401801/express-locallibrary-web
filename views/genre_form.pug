@@ -1,15 +1,28 @@
+//- ベースレイアウトを継承
 extends layout
 
+//- メインコンテンツブロック
 block content
 
+  //- ページタイトル表示
   h1 #{title}
 
+  //- ジャンル入力フォーム
   form(method='POST')
     div.form-group
-      label(for='name') Genre:
-      input#name.form-control(type='text', placeholder='Fantasy, Poetry etc.' name='name' required value=(undefined===genre ? '' : genre.name) )
-    button.btn.btn-primary(type='submit') Submit
+      //- ジャンル名入力フィールド
+      label(for='name') ジャンル名:
+      input#name.form-control(
+        type='text',
+        placeholder='例: ファンタジー, 詩集など',
+        name='name',
+        required,
+        value=(undefined===genre ? '' : genre.name)
+      )
+    //- 送信ボタン
+    button.btn.btn-primary(type='submit') 送信
 
+  //- エラーメッセージ表示
   if errors
     ul
       for error in errors

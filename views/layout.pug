@@ -1,39 +1,107 @@
 doctype html
-html(lang='en')
+html(lang='ja')
   head
-    title= title
+    title= title + ' | ライブラリ管理システム'
     meta(charset='utf-8')
-    meta(name='viewport', content='width=device-width, initial-scale=1')
+    meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
     link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css", integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
     script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js", integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj", crossorigin="anonymous")
-    script(src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js", integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+", crossorigin="anonymous")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js", integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+", crossorigin="anonymous")
     link(rel='stylesheet', href='/stylesheets/style.css')
+  
   body
-    div(class='container-fluid')
-      div(class='row')
-        div(class='col-sm-2')
-          block sidebar
-            ul(class='sidebar-nav')
-              li
-                a(href='/catalog') Home
-              li
-                a(href='/catalog/books') All books
-              li
-                a(href='/catalog/authors') All authors
-              li
-                a(href='/catalog/genres') All genres
-              li
-                a(href='/catalog/bookinstances') All book-instances
-              li
-                hr
-              li
-                a(href='/catalog/author/create') Create new author
-              li
-                a(href='/catalog/genre/create') Create new genre
-              li
-                a(href='/catalog/book/create') Create new book
-              li
-                a(href='/catalog/bookinstance/create') Create new book instance (copy)
+    div(class='container-fluid px-0')
+      div(class='row no-gutters')
+        //- サイドバー
+        div(class='col-lg-2 col-md-3 sidebar bg-dark')
+          nav
+            ul(class='nav flex-column pt-3')
+              li.nav-item
+                a.nav-link(href='/catalog')
+                  i.fas.fa-home.mr-2
+                  | ホーム
+              li.nav-item
+                a.nav-link(href='/catalog/books')
+                  i.fas.fa-book.mr-2
+                  | 書籍一覧
+              li.nav-item
+                a.nav-link(href='/catalog/authors')
+                  i.fas.fa-users.mr-2
+                  | 著者一覧
+              li.nav-item
+                a.nav-link(href='/catalog/genres')
+                  i.fas.fa-tags.mr-2
+                  | ジャンル一覧
+              li.nav-item
+                a.nav-link(href='/catalog/bookinstances')
+                  i.fas.fa-copy.mr-2
+                  | 所蔵資料一覧
+              
+              li.nav-item.my-3
+                hr.bg-secondary
+              
+              li.nav-item
+                a.nav-link(href='/catalog/author/create').text-success
+                  i.fas.fa-user-plus.mr-2
+                  | 著者を登録
+              li.nav-item
+                a.nav-link(href='/catalog/genre/create').text-success
+                  i.fas.fa-tag.mr-2
+                  | ジャンルを登録
+              li.nav-item
+                a.nav-link(href='/catalog/book/create').text-success
+                  i.fas.fa-book-medical.mr-2
+                  | 書籍を登録
+              li.nav-item
+                a.nav-link(href='/catalog/bookinstance/create').text-success
+                  i.fas.fa-plus-circle.mr-2
+                  | 資料を追加
 
-        div(class='col-sm-10')
-          block content
+        //- メインコンテンツ
+        div(class='col-lg-10 col-md-9 main-content')
+          div.container-fluid.py-4
+            block content
+
+  style.
+    body {
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .sidebar {
+      min-height: 100vh;
+      transition: all 0.3s;
+    }
+    .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav-link:hover {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid #4CAF50;
+    }
+    .nav-link i {
+      width: 20px;
+      text-align: center;
+    }
+    .main-content {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 1000;
+        width: 250px;
+        transform: translateX(-100%);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+    }

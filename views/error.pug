@@ -1,6 +1,13 @@
+//- ベースレイアウトを継承
 extends layout
 
+//- メインコンテンツブロック
 block content
+  //- エラーメッセージ表示
   h1= message
+  
+  //- エラーコード表示
   h2= error.status
+  
+  //- エラー詳細スタックトレース表示（開発用）
   pre #{error.stack}

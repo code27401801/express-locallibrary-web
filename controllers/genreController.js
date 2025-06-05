@@ -4,168 +4,172 @@ const Book = require("../models/book");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
-// Display list of all Genre.
+// 全てのジャンル一覧を表示
 exports.genre_list = asyncHandler(async (req, res, next) => {
   const allGenres = await Genre.find().sort({ name: 1 }).exec();
   res.render("genre_list", {
-    title: "Genre List",
+    title: "ジャンル一覧",
     list_genres: allGenres,
   });
 });
 
-// Display detail page for a specific Genre.
+// 特定ジャンルの詳細ページを表示
 exports.genre_detail = asyncHandler(async (req, res, next) => {
-  // Get details of genre and all associated books (in parallel)
+  // ジャンル詳細と関連書籍を並列で取得
   const [genre, booksInGenre] = await Promise.all([
     Genre.findById(req.params.id).exec(),
     Book.find({ genre: req.params.id }, "title summary").exec(),
   ]);
+  
   if (genre === null) {
-    // No results.
-    const err = new Error("Genre not found");
+    // 結果なし
+    const err = new Error("ジャンルが見つかりません");
     err.status = 404;
     return next(err);
   }
 
   res.render("genre_detail", {
-    title: "Genre Detail",
+    title: "ジャンル詳細",
     genre: genre,
     genre_books: booksInGenre,
   });
 });
 
-// Display Genre create form on GET.
+// ジャンル作成フォームをGETで表示
 exports.genre_create_get = (req, res, next) => {
-  res.render("genre_form", { title: "Create Genre" });
+  res.render("genre_form", { title: "ジャンル作成" });
 };
 
-// Handle Genre create on POST.
+// ジャンル作成をPOSTで処理
 exports.genre_create_post = [
-  // Validate and sanitize the name field.
-  body("name", "Genre name must contain at least 3 characters")
+  // ジャンル名のバリデーションとサニタイズ
+  body("name", "ジャンル名は3文字以上必要です")
     .trim()
     .isLength({ min: 3 })
     .escape(),
 
-  // Process request after validation and sanitization.
+  // バリデーション後のリクエスト処理
   asyncHandler(async (req, res, next) => {
-    // Extract the validation errors from a request.
     const errors = validationResult(req);
 
-    // Create a genre object with escaped and trimmed data.
+    // サニタイズされたデータでジャンルオブジェクト作成
     const genre = new Genre({ name: req.body.name });
 
     if (!errors.isEmpty()) {
-      // There are errors. Render the form again with sanitized values/error messages.
+      // エラーあり - フォームを再表示
       res.render("genre_form", {
-        title: "Create Genre",
+        title: "ジャンル作成",
         genre: genre,
         errors: errors.array(),
       });
       return;
     } else {
-      // Data from form is valid.
-      // Check if Genre with same name (case insensitive) already exists.
+      // データが有効
+      // 同じ名前のジャンルが存在するか確認（大文字小文字を無視）
       const genreExists = await Genre.findOne({ name: req.body.name })
         .collation({ locale: "en", strength: 2 })
         .exec();
+      
       if (genreExists) {
-        // Genre exists, redirect to its detail page.
+        // 既存ジャンルあり - 詳細ページへリダイレクト
         res.redirect(genreExists.url);
       } else {
         await genre.save();
-        // New genre saved. Redirect to genre detail page.
+        // 新規ジャンル保存後、詳細ページへリダイレクト
         res.redirect(genre.url);
       }
     }
   }),
 ];
 
-// Display Genre delete form on GET.
+// ジャンル削除フォームをGETで表示
 exports.genre_delete_get = asyncHandler(async (req, res, next) => {
-  // Get details of genre and all associated books (in parallel)
+  // ジャンルと関連書籍を並列で取得
   const [genre, booksInGenre] = await Promise.all([
     Genre.findById(req.params.id).exec(),
     Book.find({ genre: req.params.id }, "title summary").exec(),
   ]);
+  
   if (genre === null) {
-    // No results.
+    // 結果なし
     res.redirect("/catalog/genres");
   }
 
   res.render("genre_delete", {
-    title: "Delete Genre",
+    title: "ジャンル削除",
     genre: genre,
     genre_books: booksInGenre,
   });
 });
 
-// Handle Genre delete on POST.
+// ジャンル削除をPOSTで処理
 exports.genre_delete_post = asyncHandler(async (req, res, next) => {
-  // Get details of genre and all associated books (in parallel)
+  // ジャンルと関連書籍を並列で取得
   const [genre, booksInGenre] = await Promise.all([
     Genre.findById(req.params.id).exec(),
     Book.find({ genre: req.params.id }, "title summary").exec(),
   ]);
 
   if (booksInGenre.length > 0) {
-    // Genre has books. Render in same way as for GET route.
+    // 関連書籍あり - GETルートと同じように表示
     res.render("genre_delete", {
-      title: "Delete Genre",
+      title: "ジャンル削除",
       genre: genre,
       genre_books: booksInGenre,
     });
     return;
   } else {
-    // Genre has no books. Delete object and redirect to the list of genres.
+    // 関連書籍なし - 削除してジャンル一覧へリダイレクト
     await Genre.findByIdAndDelete(req.body.id);
     res.redirect("/catalog/genres");
   }
 });
 
-// Display Genre update form on GET.
+// ジャンル更新フォームをGETで表示
 exports.genre_update_get = asyncHandler(async (req, res, next) => {
   const genre = await Genre.findById(req.params.id).exec();
 
   if (genre === null) {
-    // No results.
-    const err = new Error("Genre not found");
+    // 結果なし
+    const err = new Error("ジャンルが見つかりません");
     err.status = 404;
     return next(err);
   }
 
-  res.render("genre_form", { title: "Update Genre", genre: genre });
+  res.render("genre_form", { 
+    title: "ジャンル更新", 
+    genre: genre 
+  });
 });
 
-// Handle Genre update on POST.
+// ジャンル更新をPOSTで処理
 exports.genre_update_post = [
-  // Validate and sanitize the name field.
-  body("name", "Genre name must contain at least 3 characters")
+  // ジャンル名のバリデーションとサニタイズ
+  body("name", "ジャンル名は3文字以上必要です")
     .trim()
     .isLength({ min: 3 })
     .escape(),
 
-  // Process request after validation and sanitization.
+  // バリデーション後のリクエスト処理
   asyncHandler(async (req, res, next) => {
-    // Extract the validation errors from a request .
     const errors = validationResult(req);
 
-    // Create a genre object with escaped and trimmed data (and the old id!)
+    // サニタイズされたデータと元のIDでジャンルオブジェクト作成
     const genre = new Genre({
       name: req.body.name,
       _id: req.params.id,
     });
 
     if (!errors.isEmpty()) {
-      // There are errors. Render the form again with sanitized values and error messages.
+      // エラーあり - フォームを再表示
       res.render("genre_form", {
-        title: "Update Genre",
+        title: "ジャンル更新",
         genre: genre,
         errors: errors.array(),
       });
       return;
     } else {
-      // Data from form is valid. Update the record.
+      // データが有効 - レコードを更新
       await Genre.findByIdAndUpdate(req.params.id, genre);
       res.redirect(genre.url);
     }
