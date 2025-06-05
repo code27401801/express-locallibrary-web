@@ -4,65 +4,65 @@ const Book = require("../models/book");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
-// Display list of all BookInstances.
+// 全てのBookInstanceのリストを表示
 exports.bookinstance_list = asyncHandler(async (req, res, next) => {
   const allBookInstances = await BookInstance.find().populate("book").exec();
 
   res.render("bookinstance_list", {
-    title: "Book Instance List",
+    title: "資料一覧",
     bookinstance_list: allBookInstances,
   });
 });
 
-// Display detail page for a specific BookInstance.
+// 特定のBookInstanceの詳細ページを表示
 exports.bookinstance_detail = asyncHandler(async (req, res, next) => {
   const bookInstance = await BookInstance.findById(req.params.id)
     .populate("book")
     .exec();
 
   if (bookInstance === null) {
-    // No results.
-    const err = new Error("Book copy not found");
+    // 結果なし
+    const err = new Error("資料が見つかりません");
     err.status = 404;
     return next(err);
   }
 
   res.render("bookinstance_detail", {
-    title: "Book:",
+    title: "資料詳細:",
     bookinstance: bookInstance,
   });
 });
 
-// Display BookInstance create form on GET.
+// BookInstance作成フォームをGETで表示
 exports.bookinstance_create_get = asyncHandler(async (req, res, next) => {
   const allBooks = await Book.find({}, "title").sort({ title: 1 }).exec();
 
   res.render("bookinstance_form", {
-    title: "Create BookInstance",
+    title: "資料作成",
     book_list: allBooks,
   });
 });
 
-// Handle BookInstance create on POST.
+// BookInstance作成をPOSTで処理
 exports.bookinstance_create_post = [
-  // Validate and sanitize fields.
-  body("book", "Book must be specified").trim().isLength({ min: 1 }).escape(),
-  body("imprint", "Imprint must be specified")
+  // フィールドの検証とサニタイズ
+  body("book", "書籍を指定してください").trim().isLength({ min: 1 }).escape(),
+  body("imprint", "出版情報を指定してください")
     .trim()
     .isLength({ min: 1 })
     .escape(),
   body("status").escape(),
-  body("due_back", "Invalid date")
+  body("due_back", "無効な日付形式です")
     .optional({ values: "falsy" })
     .isISO8601()
     .toDate(),
 
-  // Process request after validation and sanitization.
+  // 検証とサニタイズ後のリクエスト処理
   asyncHandler(async (req, res, next) => {
-    // Extract the validation errors from a request.
+    // リクエストから検証エラーを抽出
     const errors = validationResult(req);
 
-    // Create a BookInstance object with escaped and trimmed data.
+    // サニタイズされたデータでBookInstanceオブジェクトを作成
     const bookInstance = new BookInstance({
       book: req.body.book,
       imprint: req.body.imprint,
@@ -71,12 +71,12 @@ exports.bookinstance_create_post = [
     });
 
     if (!errors.isEmpty()) {
-      // There are errors.
-      // Render form again with sanitized values and error messages.
+      // エラーあり
+      // サニタイズされた値とエラーメッセージでフォームを再表示
       const allBooks = await Book.find({}, "title").sort({ title: 1 }).exec();
 
       res.render("bookinstance_form", {
-        title: "Create BookInstance",
+        title: "資料作成",
         book_list: allBooks,
         selected_book: bookInstance.book._id,
         errors: errors.array(),
@@ -84,80 +84,80 @@ exports.bookinstance_create_post = [
       });
       return;
     } else {
-      // Data from form is valid
+      // フォームデータが有効
       await bookInstance.save();
       res.redirect(bookInstance.url);
     }
   }),
 ];
 
-// Display BookInstance delete form on GET.
+// BookInstance削除フォームをGETで表示
 exports.bookinstance_delete_get = asyncHandler(async (req, res, next) => {
   const bookInstance = await BookInstance.findById(req.params.id)
     .populate("book")
     .exec();
 
   if (bookInstance === null) {
-    // No results.
+    // 結果なし
     res.redirect("/catalog/bookinstances");
   }
 
   res.render("bookinstance_delete", {
-    title: "Delete BookInstance",
+    title: "資料削除",
     bookinstance: bookInstance,
   });
 });
 
-// Handle BookInstance delete on POST.
+// BookInstance削除をPOSTで処理
 exports.bookinstance_delete_post = asyncHandler(async (req, res, next) => {
-  // Assume valid BookInstance id in field.
+  // フィールド内のBookInstance IDが有効と仮定
   await BookInstance.findByIdAndDelete(req.body.id);
   res.redirect("/catalog/bookinstances");
 });
 
-// Display BookInstance update form on GET.
+// BookInstance更新フォームをGETで表示
 exports.bookinstance_update_get = asyncHandler(async (req, res, next) => {
-  // Get book, all books for form (in parallel)
+  // フォーム用の書籍と全書籍を並列で取得
   const [bookInstance, allBooks] = await Promise.all([
     BookInstance.findById(req.params.id).populate("book").exec(),
     Book.find(),
   ]);
 
   if (bookInstance === null) {
-    // No results.
-    const err = new Error("Book copy not found");
+    // 結果なし
+    const err = new Error("資料が見つかりません");
     err.status = 404;
     return next(err);
   }
 
   res.render("bookinstance_form", {
-    title: "Update BookInstance",
+    title: "資料更新",
     book_list: allBooks,
     selected_book: bookInstance.book._id,
     bookinstance: bookInstance,
   });
 });
 
-// Handle BookInstance update on POST.
+// BookInstance更新をPOSTで処理
 exports.bookinstance_update_post = [
-  // Validate and sanitize fields.
-  body("book", "Book must be specified").trim().isLength({ min: 1 }).escape(),
-  body("imprint", "Imprint must be specified")
+  // フィールドの検証とサニタイズ
+  body("book", "書籍を指定してください").trim().isLength({ min: 1 }).escape(),
+  body("imprint", "出版情報を指定してください")
     .trim()
     .isLength({ min: 1 })
     .escape(),
   body("status").escape(),
-  body("due_back", "Invalid date")
+  body("due_back", "無効な日付形式です")
     .optional({ values: "falsy" })
     .isISO8601()
     .toDate(),
 
-  // Process request after validation and sanitization.
+  // 検証とサニタイズ後のリクエスト処理
   asyncHandler(async (req, res, next) => {
-    // Extract the validation errors from a request.
+    // リクエストから検証エラーを抽出
     const errors = validationResult(req);
 
-    // Create a BookInstance object with escaped/trimmed data and current id.
+    // サニタイズされたデータと現在のIDでBookInstanceオブジェクトを作成
     const bookInstance = new BookInstance({
       book: req.body.book,
       imprint: req.body.imprint,
@@ -167,13 +167,13 @@ exports.bookinstance_update_post = [
     });
 
     if (!errors.isEmpty()) {
-      // There are errors.
-      // Render the form again, passing sanitized values and errors.
+      // エラーあり
+      // サニタイズされた値とエラーメッセージでフォームを再表示
 
       const allBooks = await Book.find({}, "title").exec();
 
       res.render("bookinstance_form", {
-        title: "Update BookInstance",
+        title: "資料更新",
         book_list: allBooks,
         selected_book: bookInstance.book._id,
         errors: errors.array(),
@@ -181,9 +181,9 @@ exports.bookinstance_update_post = [
       });
       return;
     } else {
-      // Data from form is valid.
+      // フォームデータが有効
       await BookInstance.findByIdAndUpdate(req.params.id, bookInstance, {});
-      // Redirect to detail page.
+      // 詳細ページにリダイレクト
       res.redirect(bookInstance.url);
     }
   }),

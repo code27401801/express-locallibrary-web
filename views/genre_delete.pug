@@ -1,28 +1,43 @@
+//- ベースレイアウトを継承
 extends layout
 
+//- メインコンテンツブロック
 block content
 
-  h1 Delete Genre: #{genre.name}
+  //- 削除対象ジャンル名表示
+  h1 ジャンル削除: #{genre.name}
 
+  //- ジャンルに属する書籍が存在する場合
   if genre_books.length
 
-    p #[strong Delete the following books before attempting to delete this genre.]
+    //- 削除不可メッセージ
+    p #[strong このジャンルを削除するには、まず以下の書籍を削除してください。]
 
+    //- 書籍リスト表示
     div(style='margin-left:20px;margin-top:20px')
+      h4 書籍リスト
 
-      h4 Books
-
+      //- 書籍詳細リスト
       dl
         each book in genre_books
           dt
-            a(href=book.url) #{book.title}
-          dd #{book.summary}
+            a(href=book.url) #{book.title}  //- 書籍タイトル（リンク付き）
+          dd #{book.summary}  //- 書籍の概要
 
+  //- ジャンルに属する書籍が存在しない場合
   else
-    p Do you really want to delete this Genre?
+    //- 削除確認メッセージ
+    p 本当にこのジャンルを削除しますか？
 
+    //- 削除フォーム
     form(method='POST')
       div.form-group
-        input#id.form-control(type='hidden', name='id', value=genre._id )
+        //- ジャンルIDの隠しフィールド
+        input#id.form-control(
+          type='hidden',
+          name='id',
+          value=genre._id
+        )
 
-      button.btn.btn-primary(type='submit') Delete
+      //- 削除ボタン
+      button.btn.btn-primary(type='submit') 削除

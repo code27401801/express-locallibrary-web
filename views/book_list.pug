@@ -1,14 +1,51 @@
 extends layout
 
 block content
-  h1= title
-  
-  if book_list.length
-    ul
-      each book in book_list
-        li
-          a(href=book.url) #{book.title}
-          |  (#{book.author.name})
+  .container.mt-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h1 #{title}
+      a.btn.btn-primary(href="/catalog/book/create")
+        i.bi.bi-plus-circle.me-2
+        | 新しい書籍を登録
 
-  else
-    p There are no books.
+    if book_list.length
+      .card.shadow-sm
+        .card-body
+          .table-responsive
+            table.table.table-hover
+              thead
+                tr
+                  th(scope="col") 書籍タイトル
+                  th(scope="col") 著者
+                  th(scope="col") アクション
+              tbody
+                each book in book_list
+                  tr
+                    td
+                      a(href=book.url).text-decoration-none #{book.title}
+                    td #{book.author.name}
+                    td
+                      a.btn.btn-sm.btn-outline-secondary(href=book.url title="詳細を表示")
+                        i.bi.bi-eye-fill
+                      a.btn.btn-sm.btn-outline-primary.mx-2(href=book.url+'/update' title="編集")
+                        i.bi.bi-pencil-fill
+                      a.btn.btn-sm.btn-outline-danger(href=book.url+'/delete' title="削除")
+                        i.bi.bi-trash-fill
+    else
+      .alert.alert-info.mt-4
+        h4.alert-heading 
+          i.bi.bi-info-circle.me-2
+          | 書籍が見つかりません
+        p.mb-0 現在登録されている書籍はありません。新しい書籍を登録してください。
+        hr
+        a.btn.btn-info(href="/catalog/book/create") 書籍を登録する
+
+  // Bootstrap Icons
+  link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css")
+  style.
+    .table-hover tbody tr:hover {
+      background-color: rgba(13, 110, 253, 0.05);
+    }
+    a.text-decoration-none:hover {
+      text-decoration: underline !important;
+    }

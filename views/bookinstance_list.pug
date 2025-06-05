@@ -1,21 +1,32 @@
+//- レイアウトテンプレートを継承
 extends layout
 
+//- メインコンテンツブロック
 block content
+  //- ページタイトル表示
   h1= title
 
+  //- 資料が存在する場合
   if bookinstance_list.length
     ul
+      //- 各資料をループ処理
       each val in bookinstance_list
         li
+          //- 書籍タイトルと出版情報（リンク付き）
           a(href=val.url) #{val.book.title} : #{val.imprint} -&nbsp;
+          
+          //- ステータスに応じた色分け表示
           if val.status=='Available'
-            span.text-success #{val.status}
+            span.text-success #{val.status}  //- 利用可（緑色）
           else if val.status=='Maintenance'
-            span.text-danger #{val.status}
+            span.text-danger #{val.status}  //- メンテナンス中（赤色）
           else
-            span.text-warning #{val.status}
+            span.text-warning #{val.status}  //- その他ステータス（黄色）
+          
+          //- 利用不可の場合、返却期限を表示
           if val.status!='Available'
-            span  (Due: #{val.due_back_formatted})
+            span  (返却期限: #{val.due_back_formatted})
 
+  //- 資料が存在しない場合
   else
-    p There are no book copies in this library.
+    p この図書館に登録されている資料はありません。
